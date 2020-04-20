@@ -1,5 +1,7 @@
-
-#include <Adafruit_Sensor_Calibration.h>
+// AchillesG node operation function check
+// demonstrates initialization of IMU with calibration
+// 4 LEDs attached to pins 2-5 demonstrate node operation with 1 degree each along Z rotation.
+// Thank you Adafruit
 
 
 // You *must* perform a magnetic calibration before this code will work.
