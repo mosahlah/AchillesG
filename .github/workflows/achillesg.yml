@@ -2,8 +2,6 @@
 #include <Adafruit_Sensor_Calibration.h>
 
 
-// Full orientation sensing using NXP/Madgwick/Mahony and a range of 9-DoF
-// sensor sets.
 // You *must* perform a magnetic calibration before this code will work.
 //
 // To view this data, use the Arduino Serial Monitor to watch the
