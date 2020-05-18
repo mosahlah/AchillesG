@@ -1,0 +1,296 @@
+#include <Wire.h>                                                             //load libraries
+#include <SPI.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+
+#define BNO055_SAMPLERATE_DELAY_MS (100)       
+
+int dataPin = 0; // DS                                                        //intilize physical pins
+int clockPin = 1; // SHCP
+int latchPin = 2; // STCP
+
+      
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);                              //define connection 
+
+
+bool leD = 0;                                                                 //create solenoid activation bit objects
+bool soleNoid01 = 0;
+bool soleNoid02 = 0;
+bool soleNoid03 = 0;
+bool soleNoid04 = 0;
+bool soleNoid05 = 0;
+bool soleNoid06 = 0;
+bool soleNoid07 = 0;
+bool soleNoid08 = 0;
+bool soleNoid09 = 0;
+bool soleNoid10 = 0;
+bool soleNoid11 = 0;
+bool soleNoid12 = 0;
+bool soleNoid13 = 0;
+bool soleNoid14 = 0;
+bool soleNoid15 = 0;
+bool soleNoid16 = 0;
+bool soleNoid17 = 0;
+bool soleNoid18 = 0;
+bool soleNoid19 = 0;
+bool soleNoid20 = 0;
+bool soleNoid21 = 0;
+bool soleNoid22 = 0;
+bool soleNoid23 = 0;
+bool soleNoid24 = 0;
+bool soleNoid25 = 0;
+bool soleNoid26 = 0;
+bool soleNoid27 = 0;
+bool soleNoid28 = 0;
+bool soleNoid29 = 0;
+bool soleNoid30 = 0;
+
+
+
+
+
+const long addressBook[][32] =  { {0, 31.3, 30.7, 53.5, -159, -30.5, -17.8, 29.6, 18.6, -150, -180, -162, -198, 53.3, 0.382, 18.9, -17.9, -54.5, -52.9, 162,      //  2D array of 2 x 31
+-89.9, -53.8, 90.3, -151, -180, -126, 126, 150, 150, 171, 0}, {0, -54.3, -20.7, -58.2, 158, 20.7, 58.2, 21.1, 57.9, 20.9, 89.8, -59.2, -58.9, -122, 
+-89.7, -122, -57.3, -59.1, -122, -122, -38.1, 59.9, -41.1, -20.8, 0.31, -58.9, -57, -22.2, 20.7, -274, -0} };
+
+unsigned long solenoidAct[33];                                                 //create register array
+
+
+int shiftRegister1[9] = {leD, soleNoid01, soleNoid02, soleNoid03,                 //create shift register objects (0-7)
+soleNoid04, soleNoid05, soleNoid06, soleNoid07};                                  //array of boolean values corresponding to 8 pins on each register
+                                                                                  // (1) led pin, (30) solenoid array pins, (1) dead pin
+int shiftRegister2[9] = {soleNoid08, soleNoid09, soleNoid10, 
+soleNoid11, soleNoid12, soleNoid13, soleNoid14, soleNoid15};
+
+int shiftRegister3[9] = {soleNoid16, soleNoid17, soleNoid18, soleNoid19, 
+soleNoid20, soleNoid21, soleNoid22, soleNoid23};
+
+int shiftRegister4[9] = {soleNoid24, soleNoid25, soleNoid26, soleNoid27, 
+soleNoid28, soleNoid29, soleNoid30, 0};
+
+ 
+void setup(void) 
+{
+                                                                                   //set pins to output because they are addressed in the main loop
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
+
+
+  //float buffer[30]; //make memory enough?
+
+
+
+  
+  Serial.begin(9600);
+  Serial.println("Orientation Senor Test"); Serial.println("");
+  if(!bno.begin())
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    while(1);
+ 
+
+}
+
+
+void displaySensorDetails(void)
+{
+  sensor_t sensor;
+  bno.getSensor(&sensor);                                                              //display sensor info
+  Serial.println("------------------------------------");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
+  Serial.println("------------------------------------");
+  Serial.println("");
+  delay(500);
+}
+
+
+void displaySensorStatus(void)
+{
+  /* Get the system status values (mostly for debugging purposes) */              //debugging
+  uint8_t system_status, self_test_results, system_error;
+  system_status = self_test_results = system_error = 0;
+  bno.getSystemStatus(&system_status, &self_test_results, &system_error);
+
+  /* Display the results in the Serial Monitor */                                 //display errors
+  Serial.println("");
+  Serial.print("System Status: 0x");
+  Serial.println(system_status, HEX);
+  Serial.print("Self Test:     0x");
+  Serial.println(self_test_results, HEX);
+  Serial.print("System Error:  0x");
+  Serial.println(system_error, HEX);
+  Serial.println("");
+  delay(500);
+}
+
+void loop() {
+
+  
+  int voltPin = 9;                                                  //manually enter solenoid power level (will create input later)***
+                                                                    //voltage factor pin 9, do not need to call pinMode, just analogWrite(voltPin,val/#);
+
+                        
+
+  imu::Quaternion quat = bno.getQuat();//retrieve quat values from BNO055
+
+  
+  imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);  //retrieve euler values from BNO055
+
+  int8_t temp = bno.getTemp();                                      // retrieve temp data
+ 
+
+
+  Serial.print("qW: ");                                             // display quat data on serial terminal
+  Serial.print(quat.w(), 4);
+  Serial.print(" qX: ");
+  Serial.print(quat.y(), 4);
+  Serial.print(" qY: ");
+  Serial.print(quat.x(), 4);
+  Serial.print(" qZ: ");
+  Serial.print(quat.z(), 4);
+  Serial.println("");
+  
+  Serial.print("X: ");                                              // display quat data on serial terminal
+  Serial.print(euler.x());
+  Serial.print(" Y: ");
+  Serial.print(euler.y());
+  Serial.print(" Z: ");
+  Serial.print(euler.z());
+  Serial.println("");
+  
+  Serial.print("Current Temperature: ");                            //display sensor board temp, sink board near solenoid frame
+  Serial.print(temp);
+  Serial.println(" C");
+  Serial.println("");
+                
+
+  int frameX = euler.x();                                          //create objects to record current orientation
+  int frameY = euler.y();                                          //store current euler.z as frameZ
+  int frameZ = euler.z();
+  
+  unsigned int actSol = 0;                                     // create bit to load into register if activated
+  int n = 0;
+while (n = 0,n < 31, n++) {                                      // iterate through 30 solenoids
+
+  int footPrint = 2.5;                                            // adjust this variable to widen or narrow base solenoid footprint ***
+  
+  unsigned int addXn = addressBook[0][n];
+  float upXmarg = (addXn + footPrint);                          // create an object to hold the upper footPrint margin
+  float downXmarg = (addXn - footPrint);                        // create an object to hold the lower footPrint margin
+  float conframeX = constrain(frameX, downXmarg, upXmarg);         // next i will compare the current orientation axiz X,                                                           
+
+  unsigned int addYn = addressBook[1][n];
+  float upYmarg = (addYn + footPrint);                          // create an object to hold the upper footPrint margin
+  float downYmarg = (addYn - footPrint);                        // create an object to hold the lower footPrint margin
+  float conframeY = constrain(frameY, downYmarg, upYmarg);         // next i will compare the current orientation axiz X, positive values go to 
+
+
+  int courseAz = 45;                                             // manually enter course in degrees (will create input later)***          
+  
+  int upZcourse = (courseAz + 90);                               //create brackets for course plotting on solenoid array
+  int downZcourse = (courseAz - 90);                             //same. Killroy was here m(^u^)m. Trump 2020.
+  
+ 
+  float referenceX = (addXn - frameX);                          //create values for solenoid xy deviation from zero
+  float referenceY = (addYn - frameY);
+  
+  float relativeZ = (referenceX / referenceY);                   //create a ratio value from the x and y deviation values
+  
+  float tanZup = tan(upZcourse);                                 //express the morethan and lessthan angles as proportions of Y to x(1)
+  float tanZdown = tan(downZcourse);
+  float  conframeZ = constrain(relativeZ, tanZup, tanZdown);
+  
+  if(conframeX == downXmarg) {
+    addXn = 1;
+    
+  }
+  
+  if(conframeY == frameY) {
+    addYn = 1;
+    
+  }
+
+  if(conframeZ == relativeZ) {
+    actSol = 1;
+        
+  }
+
+  if(addXn + addYn + actSol == 3) {
+      
+      solenoidAct[n] = 1;                                                                       //check if it matches all parameters and fire solenoid by loading bits into the register array
+            
+  
+                                                    //Loop to next solenoid until 31
+}                                                   //end of solenoid processing x current orientation. Values for each solenoid have been checked against current orientation and 
+                                                    // loaded into the arrays. Next, array will be sent to registers. 
+
+
+  
+  
+
+                                                             // write each value to corresponding register
+  bitWrite(shiftRegister1, 0, leD );                         // led
+  bitWrite(shiftRegister1, 1, soleNoid01);                   //load first shift register
+  bitWrite(shiftRegister1, 2, soleNoid02);
+  bitWrite(shiftRegister1, 3, soleNoid03);
+  bitWrite(shiftRegister1, 4, soleNoid04);                        
+  bitWrite(shiftRegister1, 5, soleNoid05);
+  bitWrite(shiftRegister1, 6, soleNoid06);
+  bitWrite(shiftRegister1, 7, soleNoid07);
+  
+  bitWrite(shiftRegister2, 0, soleNoid08);                    //load second shift register
+  bitWrite(shiftRegister2, 1, soleNoid09);
+  bitWrite(shiftRegister2, 2, soleNoid10);
+  bitWrite(shiftRegister2, 3, soleNoid11);
+  bitWrite(shiftRegister2, 4, soleNoid12);
+  bitWrite(shiftRegister2, 5, soleNoid13);
+  bitWrite(shiftRegister2, 6, soleNoid14);
+  bitWrite(shiftRegister2, 7, soleNoid15);
+  
+  bitWrite(shiftRegister3, 0, soleNoid16);                    //load third shift register
+  bitWrite(shiftRegister3, 1, soleNoid17);
+  bitWrite(shiftRegister3, 2, soleNoid18);
+  bitWrite(shiftRegister3, 3, soleNoid19);
+  bitWrite(shiftRegister3, 4, soleNoid20);
+  bitWrite(shiftRegister3, 5, soleNoid21);
+  bitWrite(shiftRegister3, 6, soleNoid22);
+  bitWrite(shiftRegister3, 7, soleNoid23);
+  
+  bitWrite(shiftRegister4, 0, soleNoid24);                     //load fourth shift register
+  bitWrite(shiftRegister4, 1, soleNoid25);
+  bitWrite(shiftRegister4, 2, soleNoid26);
+  bitWrite(shiftRegister4, 3, soleNoid27);
+  bitWrite(shiftRegister4, 4, soleNoid28);
+  bitWrite(shiftRegister4, 5, soleNoid29);
+  bitWrite(shiftRegister4, 6, soleNoid30);
+  bitWrite(shiftRegister4, 7, leD);                            //future use
+  
+  
+  digitalWrite(latchPin, LOW);                                 //send the array configuration to the shift registers
+
+  bool shftR1 = shiftRegister1;
+  shiftOut(dataPin, clockPin, MSBFIRST, shftR1);               //  sending 4 bytes 
+  
+  bool shftR2 = shiftRegister2;
+  shiftOut(dataPin, clockPin, MSBFIRST, shftR2);
+  
+  bool shftR3 = shiftRegister3;
+  shiftOut(dataPin, clockPin, MSBFIRST, shftR3);
+  
+  bool shftR4 = shiftRegister4;
+  shiftOut(dataPin, clockPin, MSBFIRST, shftR4);
+  
+  digitalWrite(latchPin, HIGH);
+  
+  delay(10);                                               // end of main loop. Adjust delay for response and smoothness.***
+
+}
+}
