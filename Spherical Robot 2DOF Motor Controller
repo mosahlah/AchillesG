@@ -196,7 +196,7 @@ while (n = 0,n < 31, n++) {                                      // iterate thro
   int courseAz = 45;                                             // manually enter course in degrees (will create input later)***          
   
   int upZcourse = (courseAz + 90);                               //create brackets for course plotting on solenoid array
-  int downZcourse = (courseAz - 90);                             //same. Killroy was here m(^u^)m. Trump 2020.
+  int downZcourse = (courseAz - 90);                             //same. Trump 2020. m(^u^)m. 
   
  
   float referenceX = (addXn - frameX);                          //create values for solenoid xy deviation from zero
