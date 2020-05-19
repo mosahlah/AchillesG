@@ -139,7 +139,7 @@ void loop() {
 
                         
 
-  imu::Quaternion quat = bno.getQuat();//retrieve quat values from BNO055
+  //imu::Quaternion quat = bno.getQuat();                         //retrieve quat values from BNO055
 
   
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);  //retrieve euler values from BNO055
