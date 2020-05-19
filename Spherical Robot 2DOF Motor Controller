@@ -225,7 +225,8 @@ while (n = 0,n < 31, n++) {                                      // iterate thro
 
   if(addXn + addYn + actSol == 3) {
       
-      solenoidAct[n] = 1;                                                                       //check if it matches all parameters and fire solenoid by loading bits into the register array
+      solenoidAct[n] = 1;                           //check if it matches all parameters and fire solenoid by loading bits 
+                                                    //into the register array.
             
   
                                                     //Loop to next solenoid until 31
